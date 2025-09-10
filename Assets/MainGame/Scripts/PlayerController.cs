@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Scripting.APIUpdating;
 
 [AddComponentMenu("PlayerPlays/PlayerController")]
@@ -24,9 +25,9 @@ public class PlayerController: MonoBehaviour
     void Update()
     {
         Move();
-        if (Input.GetKeyDown("Space") && IsGrounded())
+        if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
         {
-            rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+            rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Force);
         }
     }
 
