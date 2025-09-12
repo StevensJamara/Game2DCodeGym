@@ -14,6 +14,8 @@ public class PlayerController: MonoBehaviour
     public float groundCheckRadius = 0.2f;
 
     private Rigidbody2D rb;
+    private bool FaceRight = true;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -27,10 +29,11 @@ public class PlayerController: MonoBehaviour
         Move();
         if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
         {
-            rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Force);
+            rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
         }
     }
 
+    #region Movement
     bool IsGrounded()
     {
         return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
@@ -38,15 +41,35 @@ public class PlayerController: MonoBehaviour
 
     private void Move()
     {
-        if (Input.GetAxis("Horizontal") != 0)
+        float horizontal = Input.GetAxis("Horizontal") * speed;
+        rb.linearVelocity = new Vector2(horizontal, rb.linearVelocity.y);
+        if ((horizontal > 0 && !FaceRight) || (horizontal < 0 && FaceRight))
         {
-            float move = Input.GetAxis("Horizontal") * speed;
-            rb.linearVelocity = new Vector2(move, rb.linearVelocity.y);
+            Flip();
         }
     }
+    #endregion
+
+    #region Flip character
+    public bool isFacingRight()
+    {
+        return FaceRight;
+    }
+
+    private void Flip()
+    {
+        FaceRight = !FaceRight;
+        Vector3 scaler = transform.localScale;
+        scaler.x *= -1;
+        transform.localScale = scaler;
+    }
+    #endregion
+
+    #region Check is on ground
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
     }
+    #endregion
 }
