@@ -1,3 +1,5 @@
+using System.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Scripting.APIUpdating;
@@ -15,12 +17,19 @@ public class PlayerController: MonoBehaviour
 
     private Rigidbody2D rb;
     private bool FaceRight = true;
+    private Animator anim;
 
+    private int isWalkingID;
+    private int isJumpingID;
 
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponentInChildren<Animator>();
+        isWalkingID = Animator.StringToHash("Walking");
+        isJumpingID = Animator.StringToHash("Jump");
     }
 
     // Update is called once per frame
@@ -29,10 +38,19 @@ public class PlayerController: MonoBehaviour
         Move();
         if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
         {
-            rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+            StartCoroutine(Jump());
         }
     }
 
+
+    #region Wait Animation
+    IEnumerator Jump()
+    {
+        anim.SetTrigger(isJumpingID);
+        yield return new WaitForSeconds(0.3f);
+        rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+    }
+    #endregion
     #region Movement
     bool IsGrounded()
     {
@@ -41,11 +59,19 @@ public class PlayerController: MonoBehaviour
 
     private void Move()
     {
-        float horizontal = Input.GetAxis("Horizontal") * speed;
+        float horizontal = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
         rb.linearVelocity = new Vector2(horizontal, rb.linearVelocity.y);
         if ((horizontal > 0 && !FaceRight) || (horizontal < 0 && FaceRight))
         {
             Flip();
+        }
+        if (math.abs(rb.linearVelocity.x) > 0.1f)
+        {
+            anim.SetBool(isWalkingID, true);
+        }
+        else
+        {
+            anim.SetBool(isWalkingID, false);
         }
     }
     #endregion
